@@ -26,10 +26,10 @@ $(document).ready(function() {
         initMap()
     }
 
-    function createMarker(markerLocation) {
+    function createMarker(markerLat, markerLng, locName) {
         var marker = new google.maps.Marker({
-            position: {lat: latitude, lng: longitude},
-            title:"Hello World!"
+            position: {lat: markerLat, lng: markerLng},
+            title: locName
         });
        
         marker.setMap(map);
@@ -39,14 +39,34 @@ $(document).ready(function() {
         var distMiles = $("#searchradius").val()
         var distMeters = distMiles * 1610
         var cuisine = $("#cuisine").val()
-        var currentMapCoords = latitude + ", " + longitude
-        var searchLocation = new google.maps.LatLng(currentMapCoords)
+        var currentMapCoords = latitude + "," + longitude
+        var searchLocation = new google.maps.LatLng(latitude,longitude)
+        var mapZoom = 12
 
         console.log(distMiles)
         console.log(distMeters)
         console.log(cuisine)
         console.log(currentMapCoords)
         console.log(searchLocation)
+
+        if (distMiles >= 10) {
+            mapZoom = 10
+        }
+        else if (distMiles >= 20) {
+            mapZoom = 9
+        }
+        else if (distMiles >= 25) {
+            mapZoom = 8
+        }
+        else {
+            mapZoom = 12
+        }
+
+        map = new google.maps.Map(document.getElementById("map"), {
+            center: {lat: latitude, lng: longitude},
+            zoom: mapZoom
+        })
+
         
         var request = {
             location: searchLocation,
@@ -64,6 +84,7 @@ $(document).ready(function() {
                 for (var i = 0; i < results.length; i++) {
                 var place = results[i];
                 console.log(place)
+                
                 var placeDetailId = place.place_id
 
                 var requestDetail = {
@@ -77,7 +98,10 @@ $(document).ready(function() {
                   function callback(placeDetail, status) {
                     if (status == google.maps.places.PlacesServiceStatus.OK) {
                         console.log(placeDetail)
-                    //   createMarker(placeDetail);
+                        var placeLat = placeDetail.geometry.location.lat()
+                        var placeLng = placeDetail.geometry.location.lng()
+                        var placeName = placeDetail.name
+                      createMarker(placeLat, placeLng, placeName);
                     }
                   }
             }
